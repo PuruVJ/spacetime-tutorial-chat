@@ -5,7 +5,7 @@ const local_auth_token =
 	localStorage.getItem(SPACETIME_AUTH_TOKEN) || undefined;
 
 export const stdb_client = new SpacetimeDBClient(
-	'ws://127.0.0.1:3000',
+	'wss://testnet.spacetimedb.com',
 	'chat',
 	local_auth_token
 );

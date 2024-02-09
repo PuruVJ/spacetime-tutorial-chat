@@ -10,7 +10,6 @@ pub struct Message {
   timestamp: Timestamp,
   sender: Identity,
 }
-
 #[spacetimedb(table)]
 pub struct User {
   #[primarykey]
@@ -68,13 +67,13 @@ pub fn identity_disconnected(ctx: ReducerContext) {
 
 #[spacetimedb(reducer)]
 pub fn set_name(ctx: ReducerContext, name: String) -> Result<()> {
-  let name = validate_name(name);
+  let name = validate_name(name)?;
 
   if let Some(user) = User::filter_by_id(&ctx.sender) {
     User::update_by_id(
       &ctx.sender,
       User {
-        name: Some(name?),
+        name: Some(name),
         ..user
       },
     );

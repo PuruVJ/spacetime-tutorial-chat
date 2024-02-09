@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useSnapshot } from 'valtio';
 import { Button } from './components/ui/button';
 import {
@@ -10,9 +11,9 @@ import {
 } from './components/ui/card';
 import { Input } from './components/ui/input';
 import { Label } from './components/ui/label';
-import { SPACETIME_AUTH_TOKEN, global_state } from './state';
-import User from './module_bindings/user';
 import SetNameReducer from './module_bindings/set_name_reducer';
+import User from './module_bindings/user';
+import { SPACETIME_AUTH_TOKEN, global_state } from './state';
 
 export function Login() {
 	const state = useSnapshot(global_state);
@@ -35,6 +36,10 @@ export function Login() {
 		localStorage.setItem(SPACETIME_AUTH_TOKEN, token);
 		localStorage.setItem('spacetime:username', name);
 	}
+
+	// useEffect(() => {
+	// 	if (state.identity) console.log(User.all());
+	// }, [state]);
 
 	return (
 		<Card>

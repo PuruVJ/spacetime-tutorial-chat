@@ -28,16 +28,17 @@ function App() {
 			global_state.identity = identity;
 			global_state.token = token;
 			global_state.name = localStorage.getItem('spacetime:username') ?? null;
+
+			stdb_client.on('initialStateSync', (...args) => {
+				console.log(args);
+				console.log(Message.all());
+			});
 		});
 	}, []);
 
 	useEffect(() => {
-		if (state.name) {
-			set_view('chat');
-		} else {
-			set_view('login');
-		}
-	});
+		set_view(state.name ? 'chat' : 'login');
+	}, [state.name]);
 
 	return (
 		<main className={css.root}>

@@ -1,20 +1,14 @@
 import css from './App.module.css';
 
-import Message from '@/module_bindings/message';
-import SendMessageReducer from '@/module_bindings/send_message_reducer';
-import SetNameReducer from '@/module_bindings/set_name_reducer';
-import User from '@/module_bindings/user';
-import { SpacetimeDBClient } from '@clockworklabs/spacetimedb-sdk';
 import { useEffect, useState } from 'react';
 import { useSnapshot } from 'valtio';
 import LoaderIcon from '~icons/svg-spinners/blocks-wave';
 import { Chat } from './Chat';
 import { Login } from './Login';
 import { stdb_client } from './client';
-import { global_state } from './state';
-
-SpacetimeDBClient.registerReducers(SendMessageReducer, SetNameReducer);
-SpacetimeDBClient.registerTables(Message, User);
+import User from './module_bindings/user';
+import { SPACETIME_AUTH_TOKEN, global_state } from './state';
+import { Identity } from '@clockworklabs/spacetimedb-sdk';
 
 function App() {
 	const [view, set_view] = useState<'loading' | 'login' | 'chat'>('loading');
@@ -24,15 +18,23 @@ function App() {
 		set_view('loading');
 
 		stdb_client.connect();
-		stdb_client.onConnect((token, identity) => {
+
+		User.onInsert((user, reducerEvent) => {
+			console.log('User.onInsert', user, reducerEvent);
+		});
+
+		stdb_client.on('initialStateSync', (...args) => {
+			console.log('initialStateSync', args);
+		});
+
+		stdb_client.onConnect((token: string, identity: Identity) => {
 			global_state.identity = identity;
 			global_state.token = token;
 			global_state.name = localStorage.getItem('spacetime:username') ?? null;
 
-			stdb_client.on('initialStateSync', (...args) => {
-				console.log(args);
-				console.log(Message.all());
-			});
+			localStorage.setItem(SPACETIME_AUTH_TOKEN, token);
+
+			stdb_client.subscribe(['SELECT * FROM User', 'SELECT * FROM Message']);
 		});
 	}, []);
 

@@ -1,21 +1,19 @@
 import css from './App.module.css';
 
-import { useEffect, useState } from 'react';
-import { useSnapshot } from 'valtio';
+import { Identity } from '@clockworklabs/spacetimedb-sdk';
+import { useSignal, useSignalEffect } from '@preact/signals';
 import LoaderIcon from '~icons/svg-spinners/blocks-wave';
 import { Chat } from './Chat';
 import { Login } from './Login';
 import { stdb_client } from './client';
 import User from './module_bindings/user';
 import { SPACETIME_AUTH_TOKEN, global_state } from './state';
-import { Identity } from '@clockworklabs/spacetimedb-sdk';
 
-function App() {
-	const [view, set_view] = useState<'loading' | 'login' | 'chat'>('loading');
-	const state = useSnapshot(global_state);
+export function App() {
+	const view = useSignal<'loading' | 'login' | 'chat'>('loading');
 
-	useEffect(() => {
-		set_view('loading');
+	useSignalEffect(() => {
+		view.value = 'loading';
 
 		stdb_client.connect();
 
@@ -28,23 +26,26 @@ function App() {
 		});
 
 		stdb_client.onConnect((token: string, identity: Identity) => {
-			global_state.identity = identity;
-			global_state.token = token;
-			global_state.name = localStorage.getItem('spacetime:username') ?? null;
+			global_state.value = {
+				...global_state.peek(),
+				identity,
+				token,
+				name: localStorage.getItem('spacetime:username') ?? null,
+			};
 
 			localStorage.setItem(SPACETIME_AUTH_TOKEN, token);
 
 			stdb_client.subscribe(['SELECT * FROM User', 'SELECT * FROM Message']);
 		});
-	}, []);
+	});
 
-	useEffect(() => {
-		set_view(state.name ? 'chat' : 'login');
-	}, [state.name]);
+	useSignalEffect(() => {
+		view.value = global_state.value.name ? 'chat' : 'login';
+	});
 
 	return (
 		<main className={css.root}>
-			{view === 'loading' ? (
+			{view.value === 'loading' ? (
 				<div
 					style={{
 						width: '100%',
@@ -55,13 +56,15 @@ function App() {
 				>
 					<LoaderIcon fontSize={50} />
 				</div>
-			) : view === 'login' ? (
-				<Login />
+			) : view.value === 'login' ? (
+				<div>
+					<Login />
+				</div>
 			) : (
-				<Chat />
+				<div>
+					<Chat />
+				</div>
 			)}
 		</main>
 	);
 }
-
-export default App;

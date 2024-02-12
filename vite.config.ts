@@ -1,13 +1,14 @@
 import path from 'path';
-import react from '@vitejs/plugin-react';
+import preact from '@preact/preset-vite';
 import { defineConfig } from 'vite';
 import UnpluginIcons from 'unplugin-icons/vite';
 
 export default defineConfig({
-	plugins: [react(), UnpluginIcons({ autoInstall: true, compiler: 'jsx', jsx: 'react' })],
-	resolve: {
-		alias: {
-			'@': path.resolve(__dirname, './src'),
-		},
+	plugins: [
+		preact({}),
+		UnpluginIcons({ autoInstall: true, compiler: 'jsx', jsx: 'preact' }),
+	],
+	optimizeDeps: {
+		include: ['preact'],
 	},
 });

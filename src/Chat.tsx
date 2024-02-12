@@ -1,15 +1,11 @@
 import css from './Chat.module.css';
 
-import { useSnapshot } from 'valtio';
 import SendIcon from '~icons/mingcute/send-plane-fill';
-import { Button } from './components/ui/button';
-import { Input } from './components/ui/input';
-import { global_state } from './state';
 
 export function Chat() {
-	const state = useSnapshot(global_state);
-
-	async function handle_submit(e: React.FormEvent<HTMLFormElement>) {
+	async function handle_submit(
+		e: SubmitEvent & { currentTarget: HTMLFormElement }
+	) {
 		const form_data = new FormData(e.currentTarget);
 		const message = form_data.get('message') as string;
 	}
@@ -25,17 +21,18 @@ export function Chat() {
 						handle_submit(e);
 					}}
 				>
-					<Input
-						className={css.input}
+					<textarea
 						name="message"
+						className="textarea textarea-bordered"
 						onInput={({ currentTarget }) => {
 							currentTarget.value = filter_emojis(currentTarget.value) ?? '';
 						}}
 						placeholder="Your emojis here"
 					/>
-					<Button type="submit">
+
+					<button className="btn btn-primary" type="submit">
 						<SendIcon />
-					</Button>
+					</button>
 				</form>
 			</section>
 		</section>
